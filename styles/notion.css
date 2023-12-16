@@ -24,6 +24,11 @@ body {
   line-height: 1.65;
 }
 
+/* add header height if there is no cover */
+.notion-page:nth-child(1) {
+  margin-top: calc(var(--notion-header-height) * 1.5) !important;
+}
+
 .index-page {
   --notion-max-width: 900px;
 }
@@ -44,6 +49,11 @@ body {
 .notion-asset-wrapper-video > div,
 .notion-asset-wrapper-video video {
   width: 100% !important;
+}
+
+/* change sticky to fixed */
+.notion-header {
+  position: fixed !important;
 }
 
 .notion-header .notion-nav-header {
