@@ -391,6 +391,25 @@ body {
   }
 }
 
+/* change breadcrumb hover & active color */
+.notion-header {
+  --breadcrumb-color-hover: rgba(55,53,47,.3);
+  --breadcrumb-color-active: rgba(55,53,47,.3);
+}
+
+.dark-mode .notion-header {
+  --breadcrumb-color-hover: rgba(255,255,255,.3);
+  --breadcrumb-color-active: rgba(255,255,255,.3);
+}
+
+.notion-header .breadcrumb:not(.active):hover {
+  background: var(--breadcrumb-color-hover);
+}
+
+.notion-header .breadcrumb:not(.active):active {
+  background: var(--breadcrumb-color-active);
+}
+
 .notion-bookmark:hover {
   border-image: linear-gradient(90.68deg, #b439df 0.26%, #e5337e 102.37%);
   border-image-slice: 1;
