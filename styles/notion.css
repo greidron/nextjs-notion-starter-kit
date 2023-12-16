@@ -209,6 +209,10 @@ body {
 .notion-page-cover-wrapper img {
   max-width: 1200px !important;
   border-radius: 24px;
+  /* increase page cover height*/
+  height: calc(30vh + var(--notion-header-height)) !important;
+  min-height: calc(30vh + var(--notion-header-height)) !important;
+  max-height: calc(30vh + var(--notion-header-height)) !important;
 }
 
 .notion-page-cover-wrapper {
