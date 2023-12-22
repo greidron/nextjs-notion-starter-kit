@@ -19,7 +19,8 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   res.setHeader('Content-Type', 'text/plain')
 
   // only allow the site to be crawlable on the production deployment
-  if (process.env.VERCEL_ENV === 'production') {
+  const NODE_ENV_NAME = process.env.NODE_ENV ?? process.env.VERCEL_ENV
+  if (NODE_ENV_NAME === 'production') {
     res.write(`User-agent: *
 Allow: /
 Disallow: /api/get-tweet-ast/*
