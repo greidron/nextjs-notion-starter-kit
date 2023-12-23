@@ -47,9 +47,13 @@ export const environment = process.env.NODE_ENV ?? process.env.VERCEL_ENV ?? 'de
 export const isProd = environment === 'production'
 export const isDev = environment === 'development'
 
+// helpers
+export const copyrightYear: string = getSiteConfig('copyrightYear', String(new Date().getFullYear()))
+
 // general site config
 export const name: string = getSiteConfig('name')
 export const author: string = getSiteConfig('author')
+export const copyright: string = getSiteConfig('copyright', '© ${copyrightYear} ${author}')
 export const domain: string = getSiteConfig('domain')
 export const description: string = getSiteConfig('description', 'Notion Blog')
 export const language: string = getSiteConfig('language', 'en')

@@ -13,6 +13,12 @@ export default siteConfig({
   domain: 'nextjs-notion-starter-kit.transitivebullsh.it',
   author: 'Travis Fischer',
 
+  // copyright text (template string with site configuration values)
+  // copyright: 'Copyright ${year} ${author}. All rights reserved.',
+
+  // copyright year (defaults to current year)
+  // copyrightYear: '2023'
+
   // open graph metadata (optional)
   description: 'Example Next.js Notion Starter Kit Site',
 
