@@ -1,6 +1,6 @@
 import type { GetServerSideProps } from 'next'
 
-import { host } from '@/lib/config'
+import { host, isProd } from '@/lib/config'
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   if (req.method !== 'GET') {
@@ -19,8 +19,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   res.setHeader('Content-Type', 'text/plain')
 
   // only allow the site to be crawlable on the production deployment
-  const NODE_ENV_NAME = process.env.NODE_ENV ?? process.env.VERCEL_ENV
-  if (NODE_ENV_NAME === 'production') {
+  if (isProd) {
     res.write(`User-agent: *
 Allow: /
 Disallow: /api/get-tweet-ast/*
