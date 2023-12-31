@@ -5,7 +5,7 @@ import { idToUuid, getBlockIcon, getBlockTitle } from 'notion-utils'
 import { PageIcon, useNotionContext } from 'react-notion-x'
 import cs from 'classnames'
 
-import { rootNotionPageId, navigationLinks } from '@/lib/config'
+import { rootNotionPageId, navigationPageIds } from '@/lib/config'
 
 function getPageBreadcrumb(block: Block, recordMap: ExtendedRecordMap): any | null {
   if (!block) {
@@ -41,12 +41,10 @@ function getBlockParentPage(block: Block, recordMap: ExtendedRecordMap): BasePag
 
 function getPageBreadcrumbs(
   recordMap: ExtendedRecordMap, activePageId: string): Array<any> {
-  const rootPageId = rootNotionPageId && idToUuid(rootNotionPageId)
-  const navigationPageIds = navigationLinks
-    ?.map((link) => idToUuid(link.pageId))
-    .filter(Boolean) ?? []
-  if (rootPageId) {
-    navigationPageIds.push(rootPageId)
+  const rootPageUuid = rootNotionPageId && idToUuid(rootNotionPageId)
+  const navigationPageUuids = navigationPageIds.map(idToUuid)
+  if (rootPageUuid) {
+    navigationPageUuids.push(rootPageUuid)
   }
 
   const blockMap = recordMap.block
@@ -61,7 +59,7 @@ function getPageBreadcrumbs(
     breadcrumb.active = currentPageId === activePageId
     breadcrumbs.push(breadcrumb)
 
-    if (navigationPageIds.includes(currentPageId)) {
+    if (navigationPageUuids.includes(currentPageId)) {
       break
     }
 
@@ -69,10 +67,10 @@ function getPageBreadcrumbs(
     currentPageId = parentBlock?.id
   }
 
-  const rootBreadcrumb = getPageBreadcrumb(blockMap[rootPageId]?.value, recordMap)
+  const rootBreadcrumb = getPageBreadcrumb(blockMap[rootPageUuid]?.value, recordMap)
   const lastPageId = breadcrumbs.slice(-1)[0]?.pageId
   
-  if (rootBreadcrumb && lastPageId !== rootPageId) {
+  if (rootBreadcrumb && lastPageId !== rootPageUuid) {
     breadcrumbs.push(rootBreadcrumb)
   }
   return breadcrumbs.reverse()

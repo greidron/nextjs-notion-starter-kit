@@ -21,6 +21,10 @@ export const navigationLinks: Array<NavigationLink | null> = getSiteConfig(
   null
 )
 
+export const navigationPageIds = navigationLinks
+  ?.map((link) => link.pageId)
+  .filter(Boolean) ?? []
+
 export const rootNotionPageId: string = parsePageId(
   getSiteConfig('rootNotionPageId'),
   { uuid: false }
