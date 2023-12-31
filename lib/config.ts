@@ -16,6 +16,11 @@ import {
   Site
 } from './types'
 
+export const navigationLinks: Array<NavigationLink | null> = getSiteConfig(
+  'navigationLinks',
+  null
+)
+
 export const rootNotionPageId: string = parsePageId(
   getSiteConfig('rootNotionPageId'),
   { uuid: false }
@@ -32,7 +37,10 @@ export const rootNotionSpaceId: string | null = parsePageId(
 )
 
 export const pageUrlOverrides = cleanPageUrlMap(
-  getSiteConfig('pageUrlOverrides', {}) || {},
+  addPageUrlOverrides(
+    getSiteConfig('pageUrlOverrides', {}) || {},
+    navigationLinks
+  ),
   { label: 'pageUrlOverrides' }
 )
 
@@ -107,11 +115,6 @@ export const includeNotionIdInUrls: boolean = getSiteConfig(
 export const navigationStyle: NavigationStyle = getSiteConfig(
   'navigationStyle',
   'default'
-)
-
-export const navigationLinks: Array<NavigationLink | null> = getSiteConfig(
-  'navigationLinks',
-  null
 )
 
 // Optional site search
@@ -223,4 +226,19 @@ function invertPageUrlOverrides(
       [pageId]: uri
     }
   }, {})
+}
+
+function addPageUrlOverrides(
+  pageUrlOverrides: PageUrlOverridesMap,
+  navigationLinks: Array<NavigationLink | null>
+): PageUrlOverridesMap {
+  const overriddenPageIds = Object.values(pageUrlOverrides)
+  for (const link of navigationLinks || []) {
+    const { title, pageId } = link
+    if (!title || !pageId || overriddenPageIds.includes(pageId)) continue
+
+    const path = '/' + title.toLowerCase()
+    pageUrlOverrides[path] = pageId
+  }
+  return pageUrlOverrides
 }
