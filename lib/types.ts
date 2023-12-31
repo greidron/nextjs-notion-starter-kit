@@ -18,7 +18,7 @@ export interface PageProps {
 }
 
 export interface Params extends ParsedUrlQuery {
-  pageId: string
+  pageId: string[]
 }
 
 export interface Site {

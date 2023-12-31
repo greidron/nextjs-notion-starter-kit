@@ -10,7 +10,8 @@ import { PageProps, Params } from '@/lib/types'
 export const getStaticProps: GetStaticProps<PageProps, Params> = async (
   context
 ) => {
-  const rawPageId = context.params.pageId as string
+  const pageId = context.params.pageId
+  const rawPageId = Array.isArray(pageId)? (pageId as string[]).join('/') : pageId as string
 
   try {
     const props = await resolveNotionPage(domain, rawPageId)
@@ -38,14 +39,13 @@ export async function getStaticPaths() {
   const staticPaths = {
     paths: Object.keys(siteMap.canonicalPageMap).map((pageId) => ({
       params: {
-        pageId
+        pageId: [pageId]
       }
     })),
     // paths: [],
     fallback: true
   }
 
-  console.log(staticPaths.paths)
   return staticPaths
 }
 
