@@ -1,11 +1,12 @@
 import * as React from 'react'
 
-import { Block, BasePageBlock, Collection, ExtendedRecordMap } from 'notion-types'
+import { Block, BasePageBlock, ExtendedRecordMap } from 'notion-types'
 import { idToUuid, getBlockIcon, getBlockTitle } from 'notion-utils'
 import { PageIcon, useNotionContext } from 'react-notion-x'
 import cs from 'classnames'
 
 import { rootNotionPageId, navigationPageIds } from '@/lib/config'
+import { getBlockParent, isPage } from '@/lib/get-block-parent'
 
 function getPageBreadcrumb(block: Block, recordMap: ExtendedRecordMap): any | null {
   if (!block) {
@@ -21,22 +22,6 @@ function getPageBreadcrumb(block: Block, recordMap: ExtendedRecordMap): any | nu
       title,
       icon,
   }
-}
-
-function getBlockParentPage(block: Block, recordMap: ExtendedRecordMap): BasePageBlock | null {
-  let currentBlock: Block | Collection = block
-  while (currentBlock !== null) {
-    const parentId: string = currentBlock.parent_id
-    const parentTable = currentBlock.parent_table === 'collection'
-      ? recordMap.collection : recordMap.block
-    currentBlock = parentTable[parentId]?.value
-
-    const blockType = (currentBlock as Block)?.type
-    if (blockType === 'page' || blockType === 'collection_view_page') {
-      return currentBlock as BasePageBlock
-    }
-  }
-  return null
 }
 
 function getPageBreadcrumbs(
@@ -63,7 +48,7 @@ function getPageBreadcrumbs(
       break
     }
 
-    const parentBlock = getBlockParentPage(block, recordMap)
+    const parentBlock = getBlockParent(block, recordMap, isPage()) as BasePageBlock
     currentPageId = parentBlock?.id
   }
 
