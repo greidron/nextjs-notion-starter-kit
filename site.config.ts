@@ -44,6 +44,10 @@ export default siteConfig({
   // environment variables. see the readme for more info
   isRedisEnabled: false,
 
+  // whether or not lru is enabled
+  // NOTE: if you enable lru, you can set the `LRU_MAX`, `LRU_TTL` environment variables.
+  isLruEnabled: false,
+
   // map of notion page IDs to URL paths (optional)
   // any pages defined here will override their default URL paths
   // example:

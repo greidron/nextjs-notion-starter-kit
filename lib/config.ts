@@ -146,6 +146,15 @@ export const redisNamespace: string | null = getEnv(
 
 // ----------------------------------------------------------------------------
 
+// Optional lru storage
+export const isLruEnabled: boolean =
+  getSiteConfig('isLruEnabled', false) || !!getEnv('LRU_ENABLED', null)
+
+export const lruMax: number = getSiteConfig('lruMax', null) || parseInt(getEnv('LRU_MAX', '1000'))
+export const lruTtl: number = getSiteConfig('lruTtl', null) || parseInt(getEnv('LRU_TTL', '0'))
+
+// ----------------------------------------------------------------------------
+
 export const isServer = typeof window === 'undefined'
 
 export const port = getEnv('PORT', '3000')
