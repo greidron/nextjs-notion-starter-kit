@@ -12,7 +12,7 @@ import { NotionRenderer } from 'react-notion-x'
 import TweetEmbed from 'react-tweet-embed'
 import { useSearchParam } from 'react-use'
 
-import * as config from '@/lib/config'
+import { isDev, isServer } from '@/lib/config'
 import * as types from '@/lib/types'
 import { mapImageUrl } from '@/lib/map-image-url'
 import { getCanonicalPageUrl, mapPageUrl } from '@/lib/map-page-url'
@@ -161,7 +161,7 @@ export const NotionPage: React.FC<types.PageProps> = ({
       Pdf,
       Modal,
       Tweet,
-      Header: NotionPageHeader,
+      Header: (props) => <NotionPageHeader {...props} site={site} />,
       propertyLastEditedTimeValue,
       propertyTextValue,
       propertyDateValue
@@ -195,12 +195,24 @@ export const NotionPage: React.FC<types.PageProps> = ({
 
   const pageAside = React.useMemo(
     () => (
-      <PageAside block={block} recordMap={recordMap} isBlogPost={isBlogPost} />
+      <PageAside
+        block={block}
+        recordMap={recordMap}
+        isBlogPost={isBlogPost}
+        author={site?.author}
+        socialAccounts={site?.socialAccounts}
+      />
     ),
-    [block, recordMap, isBlogPost]
+    [block, recordMap, isBlogPost, site?.author, site?.socialAccounts]
   )
 
-  const footer = React.useMemo(() => <Footer />, [])
+  const footer = React.useMemo(() => (
+    <Footer
+      author={site?.author}
+      copyright={site?.copyright}
+      socialAccounts={site?.socialAccounts}
+    />
+  ), [site?.author, site?.copyright, site?.socialAccounts])
 
   if (router.isFallback) {
     return <Loading />
@@ -213,14 +225,14 @@ export const NotionPage: React.FC<types.PageProps> = ({
   const title = getBlockTitle(block, recordMap) || site.name
 
   console.log('notion page', {
-    isDev: config.isDev,
+    isDev,
     title,
     pageId,
     rootNotionPageId: site.rootNotionPageId,
     recordMap
   })
 
-  if (!config.isServer) {
+  if (!isServer) {
     // add important objects to the window global for easy debugging
     const g = window as any
     g.pageId = pageId
@@ -229,18 +241,18 @@ export const NotionPage: React.FC<types.PageProps> = ({
   }
 
   const canonicalPageUrl =
-    !config.isDev && getCanonicalPageUrl(site, recordMap)(pageId)
+    !isDev && getCanonicalPageUrl(site, recordMap)(pageId)
 
   const socialImage = mapImageUrl(
     getPageProperty<string>('Social Image', block, recordMap) ||
       (block as PageBlock).format?.page_cover ||
-      config.defaultPageCover,
+      site?.defaultPageCover,
     block
   )
 
   const socialDescription =
     getPageProperty<string>('Description', block, recordMap) ||
-    config.description
+    site?.description
 
   return (
     <>
@@ -271,12 +283,12 @@ export const NotionPage: React.FC<types.PageProps> = ({
         showCollectionViewDropdown={false}
         showTableOfContents={showTableOfContents}
         minTableOfContentsItems={minTableOfContentsItems}
-        defaultPageIcon={config.defaultPageIcon}
-        defaultPageCover={config.defaultPageCover}
-        defaultPageCoverPosition={config.defaultPageCoverPosition}
+        defaultPageIcon={site?.defaultPageIcon}
+        defaultPageCover={site?.defaultPageCover}
+        defaultPageCoverPosition={site?.defaultPageCoverPosition}
         mapPageUrl={siteMapPageUrl}
         mapImageUrl={mapImageUrl}
-        searchNotion={config.isSearchEnabled ? searchNotion : null}
+        searchNotion={site?.isSearchEnabled ? searchNotion : null}
         pageAside={pageAside}
         footer={footer}
       />

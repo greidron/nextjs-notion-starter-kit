@@ -5,6 +5,12 @@ export * from 'notion-types'
 
 export type NavigationStyle = 'default' | 'custom'
 
+export interface NavigationLink {
+  title: string
+  pageId?: string
+  url?: string
+}
+
 export interface PageError {
   message?: string
   statusCode: number
@@ -21,6 +27,16 @@ export interface Params extends ParsedUrlQuery {
   pageId: string[]
 }
 
+export interface SocialAccounts {
+  twitter?: string
+  mastodon?: string
+  github?: string
+  youtube?: string
+  linkedin?: string
+  newsletter?: string
+  zhihu?: string
+}
+
 export interface Site {
   name: string
   domain: string
@@ -28,15 +44,31 @@ export interface Site {
   rootNotionPageId: string
   rootNotionSpaceId: string
 
+  // navigations
+  navigationStyle: NavigationStyle
+  navigationLinks?: Array<NavigationLink>
+  navigationPageIds?: string[]
+  inversePageUrlOverrides?: PageUrlOverridesInverseMap
+
+  // default appearance
+  defaultPageIcon?: string
+  defaultPageCover?: string
+  defaultPageCoverPosition?: number
+
   // settings
   html?: string
   fontFamily?: string
   darkMode?: boolean
   previewImages?: boolean
+  isSearchEnabled?: boolean
 
   // opengraph metadata
   description?: string
   image?: string
+
+  author?: string
+  copyright?: string
+  socialAccounts?: SocialAccounts
 }
 
 export interface SiteMap {

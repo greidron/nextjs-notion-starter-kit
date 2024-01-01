@@ -8,22 +8,23 @@ import { parsePageId } from 'notion-utils'
 import { PostHogConfig } from 'posthog-js'
 
 import { getEnv, getSiteConfig } from './get-config-value'
-import { NavigationLink } from './site-config'
 import {
   NavigationStyle,
+  NavigationLink,
   PageUrlOverridesInverseMap,
   PageUrlOverridesMap,
-  Site
+  Site,
+  SocialAccounts,
 } from './types'
 
-export const navigationLinks: Array<NavigationLink | null> = getSiteConfig(
+export const navigationLinks: Array<NavigationLink> | null = getSiteConfig(
   'navigationLinks',
   null
 )
 
-export const navigationPageIds = navigationLinks
+export const navigationPageIds: string[] | null = navigationLinks
   ?.map((link) => link.pageId)
-  .filter(Boolean) ?? []
+  .filter(Boolean)
 
 export const rootNotionPageId: string = parsePageId(
   getSiteConfig('rootNotionPageId'),
@@ -78,17 +79,6 @@ export const youtube: string | null = getSiteConfig('youtube', null)
 export const linkedin: string | null = getSiteConfig('linkedin', null)
 export const newsletter: string | null = getSiteConfig('newsletter', null)
 export const zhihu: string | null = getSiteConfig('zhihu', null)
-
-export const getMastodonHandle = (): string | null => {
-  if (!mastodon) {
-    return null
-  }
-
-  // Since Mastodon is decentralized, handles include the instance domain name.
-  // e.g. @example@mastodon.social
-  const url = new URL(mastodon)
-  return `${url.pathname.slice(1)}@${url.hostname}`
-}
 
 // default notion values for site-wide consistency (optional; may be overridden on a per-page basis)
 export const defaultPageIcon: string | null = getSiteConfig(
@@ -173,12 +163,33 @@ export const api = {
 
 // ----------------------------------------------------------------------------
 
+export const socialAccounts: SocialAccounts = {
+  twitter,
+  mastodon,
+  github,
+  youtube,
+  linkedin,
+  newsletter,
+  zhihu,
+}
+
 export const site: Site = {
   domain,
   name,
   rootNotionPageId,
   rootNotionSpaceId,
-  description
+  navigationStyle,
+  navigationLinks,
+  navigationPageIds,
+  inversePageUrlOverrides,
+  defaultPageIcon,
+  defaultPageCover,
+  defaultPageCoverPosition,
+  isSearchEnabled,
+  description,
+  copyright,
+  author,
+  socialAccounts,
 }
 
 export const fathomId = isDev ? null : process.env.NEXT_PUBLIC_FATHOM_ID

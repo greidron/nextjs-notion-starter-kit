@@ -6,19 +6,25 @@ import {
   uuidToId,
 } from 'notion-utils'
 
-import { inversePageUrlOverrides, navigationPageIds } from './config'
+import {
+  inversePageUrlOverrides as defaultInversePageUrlOverrides,
+  navigationPageIds as defaultNavigationPageIds,
+} from './config'
 import { getBlockParent } from './get-block-parent'
+import { PageUrlOverridesInverseMap } from './types'
 
 function getParentPath(
   pageId: string,
   recordMap: ExtendedRecordMap,
+  navigationPageIds: string[] | null,
+  inversePageUrlOverrides: PageUrlOverridesInverseMap
 ): string | null {
   const currentBlock = recordMap.block[idToUuid(pageId)]?.value
-  const navigationPageUuids = navigationPageIds.map(idToUuid)
+  const navigationPageUuids = navigationPageIds?.map(idToUuid)
   const parentBlock = getBlockParent(
     currentBlock,
     recordMap,
-    (b) => navigationPageUuids.includes(b?.id)
+    (b) => navigationPageUuids?.includes(b?.id)
   )
   const parentId = parentBlock?.id
   return parentId && inversePageUrlOverrides[uuidToId(parentId)]
@@ -27,7 +33,15 @@ function getParentPath(
 export function getCanonicalPageId(
   pageId: string,
   recordMap: ExtendedRecordMap,
-  { uuid = true }: { uuid?: boolean } = {}
+  {
+    uuid = true,
+    navigationPageIds = defaultNavigationPageIds,
+    inversePageUrlOverrides = defaultInversePageUrlOverrides,
+  }: {
+    uuid?: boolean,
+    navigationPageIds?: string[],
+    inversePageUrlOverrides?: PageUrlOverridesInverseMap
+  } = {}
 ): string | null {
   const cleanPageId = parsePageId(pageId, { uuid: false })
   if (!cleanPageId) {
@@ -38,7 +52,8 @@ export function getCanonicalPageId(
   if (override) {
     return override
   } else {
-    const parentPath = getParentPath(cleanPageId, recordMap)
+    const parentPath = getParentPath(
+      cleanPageId, recordMap, navigationPageIds, inversePageUrlOverrides)
     const canonicalPageId = getCanonicalPageIdImpl(pageId, recordMap, {
       uuid
     })

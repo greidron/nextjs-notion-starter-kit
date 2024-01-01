@@ -1,12 +1,11 @@
 import * as React from 'react'
 
-import * as types from 'notion-types'
+import * as types from '@/lib/types'
 import { IoMoonSharp } from '@react-icons/all-files/io5/IoMoonSharp'
 import { IoSunnyOutline } from '@react-icons/all-files/io5/IoSunnyOutline'
 import cs from 'classnames'
 import { Header, Search, useNotionContext } from 'react-notion-x'
 
-import { isSearchEnabled, navigationLinks, navigationStyle } from '@/lib/config'
 import { useDarkMode } from '@/lib/use-dark-mode'
 
 import { Breadcrumbs } from './Breadcrumbs'
@@ -35,9 +34,17 @@ const ToggleThemeButton = () => {
 }
 
 export const NotionPageHeader: React.FC<{
+  site: types.Site,
   block: types.CollectionViewPageBlock | types.PageBlock
-}> = ({ block }) => {
+}> = ({ site, block }) => {
   const { components, mapPageUrl } = useNotionContext()
+  const {
+    isSearchEnabled,
+    rootNotionPageId,
+    navigationStyle,
+    navigationLinks,
+    navigationPageIds,
+  } = site
 
   if (navigationStyle === 'default') {
     return <Header block={block} />
@@ -46,7 +53,11 @@ export const NotionPageHeader: React.FC<{
   return (
     <header className='notion-header'>
       <div className='notion-nav-header'>
-        <Breadcrumbs block={block} />
+        <Breadcrumbs
+          block={block}
+          rootPageId={rootNotionPageId}
+          navigationPageIds={navigationPageIds}
+        />
 
         <div className='notion-nav-header-rhs breadcrumbs'>
           {navigationLinks

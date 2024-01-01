@@ -10,15 +10,29 @@ import { FaZhihu } from '@react-icons/all-files/fa/FaZhihu'
 import { IoMoonSharp } from '@react-icons/all-files/io5/IoMoonSharp'
 import { IoSunnyOutline } from '@react-icons/all-files/io5/IoSunnyOutline'
 
-import * as config from '@/lib/config'
-import { template } from '@/lib/template'
+import { SocialAccounts } from '@/lib/types'
 import { useDarkMode } from '@/lib/use-dark-mode'
 
 import styles from './styles.module.css'
 
+const getMastodonHandle = (mastodon?: string): string | null => {
+  if (!mastodon) {
+    return null
+  }
+
+  // Since Mastodon is decentralized, handles include the instance domain name.
+  // e.g. @example@mastodon.social
+  const url = new URL(mastodon)
+  return `${url.pathname.slice(1)}@${url.hostname}`
+}
+
 // TODO: merge the data and icons from PageSocial with the social links in Footer
 
-export const FooterImpl: React.FC = () => {
+export const FooterImpl: React.FC<{
+  author?: string
+  copyright?: string
+  socialAccounts?: SocialAccounts
+}> = ({ author, copyright, socialAccounts }) => {
   const [hasMounted, setHasMounted] = React.useState(false)
   const { isDarkMode, toggleDarkMode } = useDarkMode()
 
@@ -36,7 +50,7 @@ export const FooterImpl: React.FC = () => {
 
   return (
     <footer className={styles.footer}>
-      <div className={styles.copyright}>{template(config.copyright, config)}</div>
+      <div className={styles.copyright}>{copyright}</div>
 
       <div className={styles.settings}>
         {hasMounted && (
@@ -53,11 +67,11 @@ export const FooterImpl: React.FC = () => {
       </div>
 
       <div className={styles.social}>
-        {config.twitter && (
+        {socialAccounts?.twitter && (
           <a
             className={styles.twitter}
-            href={`https://twitter.com/${config.twitter}`}
-            title={`Twitter @${config.twitter}`}
+            href={`https://twitter.com/${socialAccounts.twitter}`}
+            title={`Twitter @${socialAccounts.twitter}`}
             target='_blank'
             rel='noopener noreferrer'
           >
@@ -65,22 +79,22 @@ export const FooterImpl: React.FC = () => {
           </a>
         )}
 
-        {config.mastodon && (
+        {socialAccounts?.mastodon && (
           <a
             className={styles.mastodon}
-            href={config.mastodon}
-            title={`Mastodon ${config.getMastodonHandle()}`}
+            href={socialAccounts.mastodon}
+            title={`Mastodon ${getMastodonHandle(socialAccounts.mastodon)}`}
             rel='me'
           >
             <FaMastodon />
           </a>
         )}
 
-        {config.zhihu && (
+        {socialAccounts?.zhihu && (
           <a
             className={styles.zhihu}
-            href={`https://zhihu.com/people/${config.zhihu}`}
-            title={`Zhihu @${config.zhihu}`}
+            href={`https://zhihu.com/people/${socialAccounts.zhihu}`}
+            title={`Zhihu @${socialAccounts.zhihu}`}
             target='_blank'
             rel='noopener noreferrer'
           >
@@ -88,11 +102,11 @@ export const FooterImpl: React.FC = () => {
           </a>
         )}
 
-        {config.github && (
+        {socialAccounts?.github && (
           <a
             className={styles.github}
-            href={`https://github.com/${config.github}`}
-            title={`GitHub @${config.github}`}
+            href={`https://github.com/${socialAccounts.github}`}
+            title={`GitHub @${socialAccounts.github}`}
             target='_blank'
             rel='noopener noreferrer'
           >
@@ -100,11 +114,11 @@ export const FooterImpl: React.FC = () => {
           </a>
         )}
 
-        {config.linkedin && (
+        {socialAccounts?.linkedin && (
           <a
             className={styles.linkedin}
-            href={`https://www.linkedin.com/in/${config.linkedin}`}
-            title={`LinkedIn ${config.author}`}
+            href={`https://www.linkedin.com/in/${socialAccounts.linkedin}`}
+            title={`LinkedIn ${author}`}
             target='_blank'
             rel='noopener noreferrer'
           >
@@ -112,11 +126,11 @@ export const FooterImpl: React.FC = () => {
           </a>
         )}
 
-        {config.newsletter && (
+        {socialAccounts?.newsletter && (
           <a
             className={styles.newsletter}
-            href={`${config.newsletter}`}
-            title={`Newsletter ${config.author}`}
+            href={`${socialAccounts.newsletter}`}
+            title={`Newsletter ${author}`}
             target='_blank'
             rel='noopener noreferrer'
           >
@@ -124,11 +138,11 @@ export const FooterImpl: React.FC = () => {
           </a>
         )}
 
-        {config.youtube && (
+        {socialAccounts?.youtube && (
           <a
             className={styles.youtube}
-            href={`https://www.youtube.com/${config.youtube}`}
-            title={`YouTube ${config.author}`}
+            href={`https://www.youtube.com/${socialAccounts.youtube}`}
+            title={`YouTube ${author}`}
             target='_blank'
             rel='noopener noreferrer'
           >

@@ -17,24 +17,24 @@ export const mapPageUrl =
     if (uuidToId(pageUuid) === site.rootNotionPageId) {
       return createUrl('/', searchParams)
     } else {
-      return createUrl(
-        `/${getCanonicalPageId(pageUuid, recordMap, { uuid })}`,
-        searchParams
+      const canonicalPageId = getCanonicalPageId(
+        pageUuid, recordMap,
+        {
+          uuid,
+          navigationPageIds: site.navigationPageIds,
+          inversePageUrlOverrides: site.inversePageUrlOverrides,
+        }
       )
+      return createUrl(`/${canonicalPageId}`, searchParams)
     }
   }
 
 export const getCanonicalPageUrl =
-  (site: Site, recordMap: ExtendedRecordMap) =>
-  (pageId = '') => {
-    const pageUuid = parsePageId(pageId, { uuid: true })
-
-    if (uuidToId(pageId) === site.rootNotionPageId) {
-      return `https://${site.domain}`
-    } else {
-      return `https://${site.domain}/${getCanonicalPageId(pageUuid, recordMap, {
-        uuid
-      })}`
+  (site: Site, recordMap: ExtendedRecordMap) => {
+    const mapPageUrlFn = mapPageUrl(site, recordMap, new URLSearchParams())
+    return (pageId = '') => {
+      const pageUrl = mapPageUrlFn(pageId).replace(/\/+$/, '')
+      return `https://${site.domain}${pageUrl}`
     }
   }
 

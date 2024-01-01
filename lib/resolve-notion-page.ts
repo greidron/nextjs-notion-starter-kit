@@ -3,9 +3,11 @@ import { parsePageId } from 'notion-utils'
 
 import * as acl from './acl'
 import { environment, pageUrlAdditions, pageUrlOverrides, site } from './config'
+import * as config from './config'
 import { db } from './db'
 import { getSiteMap } from './get-site-map'
 import { getPage } from './notion'
+import { template } from './template'
 
 export async function resolveNotionPage(domain: string, rawPageId?: string) {
   let pageId: string
@@ -86,6 +88,10 @@ export async function resolveNotionPage(domain: string, rawPageId?: string) {
     recordMap = await getPage(pageId)
   }
 
-  const props = { site, recordMap, pageId }
+  const modifiedSite = {
+    ...site,
+    copyright: template(site.copyright, config),
+  }
+  const props = { site: modifiedSite, recordMap, pageId }
   return { ...props, ...(await acl.pageAcl(props)) }
 }

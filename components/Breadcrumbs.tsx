@@ -5,7 +5,6 @@ import { idToUuid, getBlockIcon, getBlockTitle } from 'notion-utils'
 import { PageIcon, useNotionContext } from 'react-notion-x'
 import cs from 'classnames'
 
-import { rootNotionPageId, navigationPageIds } from '@/lib/config'
 import { getBlockParent, isPage } from '@/lib/get-block-parent'
 
 function getPageBreadcrumb(block: Block, recordMap: ExtendedRecordMap): any | null {
@@ -25,13 +24,11 @@ function getPageBreadcrumb(block: Block, recordMap: ExtendedRecordMap): any | nu
 }
 
 function getPageBreadcrumbs(
-  recordMap: ExtendedRecordMap, activePageId: string): Array<any> {
-  const rootPageUuid = rootNotionPageId && idToUuid(rootNotionPageId)
-  const navigationPageUuids = navigationPageIds.map(idToUuid)
-  if (rootPageUuid) {
-    navigationPageUuids.push(rootPageUuid)
-  }
-
+  rootPageUuid: string,
+  navigationPageUuids: string[],
+  recordMap: ExtendedRecordMap,
+  activePageId: string
+): Array<any> {
   const blockMap = recordMap.block
   const breadcrumbs = []
   let currentPageId = activePageId
@@ -62,13 +59,22 @@ function getPageBreadcrumbs(
 }
 
 export const Breadcrumbs: React.FC<{
-  block: Block
-}> = ({ block }) => {
+  block: Block,
+  rootPageId: string,
+  navigationPageIds?: string[]
+}> = ({ block, rootPageId, navigationPageIds }) => {
   const { recordMap, mapPageUrl, components } = useNotionContext()
-
   const breadcrumbs = React.useMemo(
-      () => getPageBreadcrumbs(recordMap, block.id),
-      [recordMap, block.id])
+      () => {
+        const rootPageUuid = rootPageId && idToUuid(rootPageId)
+        const navigationPageUuids = navigationPageIds?.map(idToUuid) ?? []
+        if (rootPageUuid) {
+          navigationPageUuids.push(rootPageUuid)
+        }
+        return getPageBreadcrumbs(
+          rootPageUuid, navigationPageUuids, recordMap, block.id)
+      },
+      [recordMap, block.id, rootPageId, navigationPageIds])
 
   return (
     <div className='breadcrumbs' key='breadcrumbs'>
