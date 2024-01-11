@@ -6,7 +6,11 @@ import * as types from './types'
 import { api } from './config'
 
 export const searchNotion = pMemoize(searchNotionImpl, {
-  cacheKey: (args) => args[0]?.query,
+  cacheKey: ([params]) => {
+    const query = encodeURIComponent(params?.query)
+    const ancestorId = params?.ancestorId
+    return `search:${query}:${ancestorId}`
+  },
   cache: new ExpiryMap(10000)
 })
 

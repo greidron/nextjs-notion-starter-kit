@@ -17,6 +17,7 @@ import * as types from '@/lib/types'
 import { mapImageUrl } from '@/lib/map-image-url'
 import { getCanonicalPageUrl, mapPageUrl } from '@/lib/map-page-url'
 import { searchNotion } from '@/lib/search-notion'
+import { withSearchScope } from '@/lib/with-search-scope'
 import { useDarkMode } from '@/lib/use-dark-mode'
 
 import { Footer } from './Footer'
@@ -214,6 +215,14 @@ export const NotionPage: React.FC<types.PageProps> = ({
       socialAccounts={site?.socialAccounts}
     />
   ), [site?.author, site?.copyright, site?.socialAccounts])
+  const scopedSearchNotion = React.useMemo(
+    () => site?.isSearchEnabled? (
+      withSearchScope(
+        site?.rootNotionPageId, site?.navigationPageIds, recordMap
+      )(searchNotion)
+    ) : null,
+    [site?.isSearchEnabled, site?.rootNotionPageId, site?.navigationPageIds, recordMap]
+  )
 
   if (router.isFallback) {
     return <Loading />
@@ -289,7 +298,7 @@ export const NotionPage: React.FC<types.PageProps> = ({
         defaultPageCoverPosition={site?.defaultPageCoverPosition}
         mapPageUrl={siteMapPageUrl}
         mapImageUrl={mapImageUrl}
-        searchNotion={site?.isSearchEnabled ? searchNotion : null}
+        searchNotion={scopedSearchNotion}
         pageAside={pageAside}
         footer={footer}
       />
