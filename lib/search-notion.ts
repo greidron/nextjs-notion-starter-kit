@@ -1,4 +1,3 @@
-// import ky from 'ky'
 import ExpiryMap from 'expiry-map'
 import fetch from 'isomorphic-unfetch'
 import pMemoize from 'p-memoize'
@@ -32,10 +31,4 @@ async function searchNotionImpl(
       return Promise.reject(error)
     })
     .then((res) => res.json())
-
-  // return ky
-  //   .post(api.searchNotion, {
-  //     json: params
-  //   })
-  //   .json()
 }
