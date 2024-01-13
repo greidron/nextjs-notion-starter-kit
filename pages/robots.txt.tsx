@@ -1,6 +1,6 @@
 import type { GetServerSideProps } from 'next'
 
-import { host, isProd } from '@/lib/config'
+import { host, isProd, robotDisallow } from '@/lib/config'
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   if (req.method !== 'GET') {
@@ -20,10 +20,11 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
 
   // only allow the site to be crawlable on the production deployment
   if (isProd) {
+    const disallowList = (robotDisallow ?? []).map((path) => `Disallow: ${path}`).join('\r\n')
     res.write(`User-agent: *
 Allow: /
-Disallow: /api/get-tweet-ast/*
-Disallow: /api/search-notion
+${disallowList}
+Disallow: /api/*
 
 Sitemap: ${host}/sitemap.xml
 `)

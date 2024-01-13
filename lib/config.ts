@@ -162,6 +162,9 @@ export const api = {
 }
 
 // ----------------------------------------------------------------------------
+export const robotDisallow: Array<string> | null = getSiteConfig('robotDisallow', [])
+
+// ----------------------------------------------------------------------------
 
 export const socialAccounts: SocialAccounts = {
   twitter,
