@@ -21,41 +21,71 @@ export async function getSiteMap(): Promise<types.SiteMap> {
   } as types.SiteMap
 }
 
+const ALL_PAGES_KEY = Symbol("AllPages")
+const pageCache = new Map()
+
+const getPageImpl = async (pageId: string, ...args) => {
+  console.log('\nnotion getPage', uuidToId(pageId))
+  const recordMap = await notion.getPage(pageId, ...args)
+  // calculate canonical page ID in advance
+  const block = recordMap.block[pageId]?.value
+  if (getPageProperty<boolean|null>('Public', block, recordMap) ?? true) {
+    if (!block.properties) {
+      block.properties = {}
+    }
+    block.properties.canonical_page_id = getCanonicalPageId(pageId, recordMap, {
+      uuid
+    })
+  }
+  return recordMap
+}
+
+export function updateSiteMap(pageId: string): Promise<types.SiteMap> {
+  pageCache.delete(pageId)
+  pageCache.delete(ALL_PAGES_KEY)
+  return getSiteMap()
+}
+
+const getPage = pMemoize(getPageImpl, {
+  cacheKey: ([pageId]) => (pageId),
+  cache: pageCache,
+})
+
 const getAllPages = pMemoize(getAllPagesImpl, {
-  cacheKey: (...args) => JSON.stringify(args)
+  cacheKey: () => (ALL_PAGES_KEY),
+  cache: pageCache,
 })
 
 async function getAllPagesImpl(
   rootNotionPageId: string,
   rootNotionSpaceId: string
 ): Promise<Partial<types.SiteMap>> {
-  const getPage = async (pageId: string, ...args) => {
-    console.log('\nnotion getPage', uuidToId(pageId))
-    return notion.getPage(pageId, ...args)
-  }
-
   const pageMap = await getAllPagesInSpace(
     rootNotionPageId,
     rootNotionSpaceId,
     getPage
   )
 
-  const canonicalPageMap = Object.keys(pageMap).reduce(
-    (map, pageId: string) => {
+  const canonicalPageMap = Object.keys(pageMap)
+    .map((pageId) => {
       const recordMap = pageMap[pageId]
       if (!recordMap) {
         throw new Error(`Error loading page "${pageId}"`)
       }
-
       const block = recordMap.block[pageId]?.value
-      if (!(getPageProperty<boolean|null>('Public', block, recordMap) ?? true)) {
+      if (!block) {
+        return null
+      }
+      return block
+    })
+    .filter(Boolean)
+    .sort((lhs, rhs) => ((lhs.created_time ?? 0) - (rhs.created_time ?? 0)))
+    .reduce((map, block) => {
+      const pageId = block.id
+      const canonicalPageId = block.properties?.canonical_page_id
+      if (!canonicalPageId) {
         return map
       }
-
-      const canonicalPageId = getCanonicalPageId(pageId, recordMap, {
-        uuid
-      })
-
       if (map[canonicalPageId]) {
         // you can have multiple pages in different collections that have the same id
         // TODO: we may want to error if neither entry is a collection page
@@ -72,9 +102,7 @@ async function getAllPagesImpl(
           [canonicalPageId]: pageId
         }
       }
-    },
-    {}
-  )
+    }, {})
 
   return {
     pageMap,

@@ -3,6 +3,10 @@ import { ParsedUrlQuery } from 'querystring'
 
 export * from 'notion-types'
 
+export interface RecordMapMeta {
+  hash?: string
+}
+
 export type NavigationStyle = 'default' | 'custom'
 
 export interface NavigationLink {
