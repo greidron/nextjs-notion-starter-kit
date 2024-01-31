@@ -8,16 +8,31 @@ import { db } from './db'
 import { getSiteMap, updateSiteMap } from './get-site-map'
 import { getPage } from './notion'
 import { template } from './template'
-import { RecordMapMeta } from './types'
+import { SiteMap, RecordMapMeta } from './types'
 
-export async function resolveNotionPage(domain: string, rawPageId?: string) {
+function getSiteMapUrl(siteMap: SiteMap, pageId: string) {
+  const canonicalPageId = siteMap?.pageMap[pageId]?.block?.[pageId]?.value?.properties?.canonical_page_id
+  return canonicalPageId && `/${canonicalPageId}`
+}
+
+export async function resolveNotionPage(domain: string, path?: string) {
   let pageId: string
   let pageHash: string
   let recordMap: ExtendedRecordMap & RecordMapMeta
   let siteMap = await getSiteMap()
 
-  if (rawPageId && rawPageId !== 'index') {
-    const cacheKey = `uri-to-page-id:${domain}:${environment}:${rawPageId}`
+  if (path && path !== 'index') {
+    // page ID from path
+    pageId = parsePageId(path)
+    if (pageId) {
+      // redirect URL with page UUID
+      const redirectUrl = getSiteMapUrl(siteMap, pageId)
+      if (redirectUrl) {
+        return { redirectUrl }
+      }
+    }
+
+    const cacheKey = `uri-to-page-id:${domain}:${environment}:${path}`
     let dbData: string
     try {
       dbData = await db.get(cacheKey)
@@ -32,33 +47,12 @@ export async function resolveNotionPage(domain: string, rawPageId?: string) {
 
     if (pageId) {
       recordMap = await getPage(pageId, { meta: true })
-
-      if (pageHash !== recordMap.hash) {
-        // update site map if page content is changed
-        if (pageHash) {
-          siteMap = await updateSiteMap(pageId)
-        }
-        try {
-          // update the database mapping of URI to pageId
-          const dbEntry = {
-            pageId,
-            pageHash: recordMap.hash,
-          }
-          await db.set(cacheKey, JSON.stringify(dbEntry))
-        } catch (err) {
-          // ignore redis errors
-          console.warn(`redis error set "${cacheKey}"`, err.message)
-        }
-      }
     } else {
-      // page ID from raw page ID
-      pageId = parsePageId(rawPageId)
-
       // check if the site configuration provides an override or a fallback for
       // the page's URI
       if (!pageId) {
         const override =
-          pageUrlOverrides[rawPageId] || pageUrlAdditions[rawPageId]
+          pageUrlOverrides[path] || pageUrlAdditions[path]
         if (override) {
           pageId = parsePageId(override)
         }
@@ -67,31 +61,36 @@ export async function resolveNotionPage(domain: string, rawPageId?: string) {
       // handle mapping of user-friendly canonical page paths to Notion page IDs
       // e.g., /developer-x-entrepreneur versus /71201624b204481f862630ea25ce62fe
       if (!pageId) {
-        pageId = siteMap?.canonicalPageMap[rawPageId]
+        pageId = siteMap?.canonicalPageMap[path]
       }
 
       if (pageId) {
         recordMap = await getPage(pageId, { meta: true })
-
-        try {
-          // update the database mapping of URI to pageId
-          const dbEntry = {
-            pageId,
-            pageHash: recordMap.hash,
-          }
-          await db.set(cacheKey, JSON.stringify(dbEntry))
-        } catch (err) {
-          // ignore redis errors
-          console.warn(`redis error set "${cacheKey}"`, err.message)
-        }
       } else {
         // note: we're purposefully not caching URI to pageId mappings for 404s
         return {
           error: {
-            message: `Not found "${rawPageId}"`,
+            message: `Not found "${path}"`,
             statusCode: 404
           }
         }
+      }
+    }
+
+    if (pageHash !== recordMap.hash) {
+      // update site map if page content is changed
+      if (pageHash) {
+        siteMap = await updateSiteMap(pageId)
+      }
+      try {
+        // update the database mapping of URI to pageId
+        const dbEntry = {
+          pageId,
+          pageHash: recordMap.hash,
+        }
+        await db.set(cacheKey, JSON.stringify(dbEntry))
+      } catch (err) {
+        console.warn(`DB error set "${cacheKey}"`, err.message)
       }
     }
   } else {

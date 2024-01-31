@@ -10,12 +10,23 @@ export const getServerSideProps: GetServerSideProps<PageProps, Params> = async (
   context
 ) => {
   const pageId = context.params.pageId
-  const rawPageId = Array.isArray(pageId)? (pageId as string[]).join('/') : pageId as string
+  const path = Array.isArray(pageId)? (pageId as string[]).join('/') : pageId as string
 
   try {
-    return { props: await resolveNotionPage(domain, rawPageId) }
+    const props = await resolveNotionPage(domain, path)
+    if (props.redirectUrl) {
+      return {
+        redirect: {
+          permanent: true,
+          destination: props.redirectUrl,
+        },
+        props: {}
+      }
+    } else {
+      return { props }
+    }
   } catch (err) {
-    console.error('page error', domain, rawPageId, err)
+    console.error('page error', domain, path, err)
 
     // we don't want to publish the error version of this page, so
     // let next.js know explicitly that incremental SSG failed
