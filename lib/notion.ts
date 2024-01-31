@@ -67,6 +67,10 @@ export async function getPage(
   if (meta) {
     recordMapMeta = {
       hash: recordMapHash(recordMap),
+      pageIds: Object.keys(recordMap.block)
+        .map((k) => (recordMap.block[k]?.value))
+        .filter((b) => (b?.type === 'page' || b?.type === 'collection_view_page'))
+        .map((b) => (b?.id)),
     }
   }
 

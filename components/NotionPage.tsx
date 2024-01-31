@@ -245,6 +245,7 @@ export const NotionPage: React.FC<types.PageProps> = ({
   if (!isServer) {
     // add important objects to the window global for easy debugging
     const g = window as any
+    g.site = site
     g.pageId = pageId
     g.recordMap = recordMap
     g.block = block

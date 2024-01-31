@@ -5,6 +5,7 @@ export * from 'notion-types'
 
 export interface RecordMapMeta {
   hash?: string
+  pageIds?: string[]
 }
 
 export type NavigationStyle = 'default' | 'custom'

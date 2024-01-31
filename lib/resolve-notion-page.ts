@@ -1,5 +1,5 @@
 import { ExtendedRecordMap } from 'notion-types'
-import { parsePageId } from 'notion-utils'
+import { parsePageId, uuidToId } from 'notion-utils'
 
 import * as acl from './acl'
 import { environment, pageUrlAdditions, pageUrlOverrides, site } from './config'
@@ -14,6 +14,7 @@ export async function resolveNotionPage(domain: string, rawPageId?: string) {
   let pageId: string
   let pageHash: string
   let recordMap: ExtendedRecordMap & RecordMapMeta
+  let siteMap = await getSiteMap()
 
   if (rawPageId && rawPageId !== 'index') {
     const cacheKey = `uri-to-page-id:${domain}:${environment}:${rawPageId}`
@@ -35,7 +36,7 @@ export async function resolveNotionPage(domain: string, rawPageId?: string) {
       if (pageHash !== recordMap.hash) {
         // update site map if page content is changed
         if (pageHash) {
-          await updateSiteMap(pageId)
+          siteMap = await updateSiteMap(pageId)
         }
         try {
           // update the database mapping of URI to pageId
@@ -66,7 +67,6 @@ export async function resolveNotionPage(domain: string, rawPageId?: string) {
       // handle mapping of user-friendly canonical page paths to Notion page IDs
       // e.g., /developer-x-entrepreneur versus /71201624b204481f862630ea25ce62fe
       if (!pageId) {
-        const siteMap = await getSiteMap()
         pageId = siteMap?.canonicalPageMap[rawPageId]
       }
 
@@ -99,8 +99,21 @@ export async function resolveNotionPage(domain: string, rawPageId?: string) {
     recordMap = await getPage(pageId, { meta: true })
   }
 
+  // resolve duplicated page urls in current page
+  const canonicalPageMap = siteMap?.canonicalPageMap
+  const inversePageUrlOverrides = {...site.inversePageUrlOverrides}
+  if (canonicalPageMap) {
+    const targetPageUuids = new Set(recordMap.pageIds)
+    Object.entries(canonicalPageMap).reduce((map, [path, uuid]) => {
+      if (targetPageUuids.has(uuid)) {
+        map[uuidToId(uuid)] = path
+      }
+      return map
+    }, inversePageUrlOverrides)
+  }
   const modifiedSite = {
     ...site,
+    inversePageUrlOverrides,
     copyright: template(site.copyright, config),
   }
   const props = { site: modifiedSite, recordMap, pageId }

@@ -1,9 +1,8 @@
 import { getAllPagesInSpace, uuidToId, getPageProperty } from 'notion-utils'
 import pMemoize from 'p-memoize'
 
-import * as config from './config'
 import * as types from './types'
-import { includeNotionIdInUrls } from './config'
+import { rootNotionPageId, rootNotionSpaceId, includeNotionIdInUrls, site } from './config'
 import { getCanonicalPageId } from './get-canonical-page-id'
 import { notion } from './notion-api'
 
@@ -11,16 +10,17 @@ const uuid = !!includeNotionIdInUrls
 
 export async function getSiteMap(): Promise<types.SiteMap> {
   const partialSiteMap = await getAllPages(
-    config.rootNotionPageId,
-    config.rootNotionSpaceId
+    rootNotionPageId,
+    rootNotionSpaceId
   )
 
   return {
-    site: config.site,
+    site,
     ...partialSiteMap
   } as types.SiteMap
 }
 
+const MAX_COLLISION = 1000
 const ALL_PAGES_KEY = Symbol("AllPages")
 const pageCache = new Map()
 
@@ -66,6 +66,7 @@ async function getAllPagesImpl(
     getPage
   )
 
+  const duplicatedIdCounter = new Map()
   const canonicalPageMap = Object.keys(pageMap)
     .map((pageId) => {
       const recordMap = pageMap[pageId]
@@ -86,22 +87,27 @@ async function getAllPagesImpl(
       if (!canonicalPageId) {
         return map
       }
-      if (map[canonicalPageId]) {
-        // you can have multiple pages in different collections that have the same id
-        // TODO: we may want to error if neither entry is a collection page
+      let mappedPageId = canonicalPageId
+      for (let i = 0; i < MAX_COLLISION; ++i) {
+        if (!duplicatedIdCounter.has(mappedPageId)) {
+          break
+        }
+        const ordinal = duplicatedIdCounter.get(canonicalPageId)
+        duplicatedIdCounter.set(canonicalPageId, ordinal + 1)
+        mappedPageId = `${canonicalPageId}-${ordinal}`
+      }
+
+      if (!duplicatedIdCounter.has(mappedPageId)) {
+        duplicatedIdCounter.set(mappedPageId, 2)
+        map[mappedPageId] = pageId
+      } else {
         console.warn('error duplicate canonical page id', {
           canonicalPageId,
           pageId,
           existingPageId: map[canonicalPageId]
         })
-
-        return map
-      } else {
-        return {
-          ...map,
-          [canonicalPageId]: pageId
-        }
       }
+      return map
     }, {})
 
   return {
