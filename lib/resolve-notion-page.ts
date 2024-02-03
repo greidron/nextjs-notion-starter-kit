@@ -98,6 +98,19 @@ export async function resolveNotionPage(domain: string, path?: string) {
     recordMap = await getPage(pageId, { meta: true })
   }
 
+  // resolve page icon & cover of collection view page
+  const currentBlock = recordMap.block?.[pageId]?.value
+  const collectionPointer = currentBlock?.format?.collection_pointer
+  const collectionBlock = recordMap[collectionPointer?.table]?.[collectionPointer?.id]?.value
+  if (currentBlock?.format && collectionBlock) {
+    if (!currentBlock.format.page_icon) {
+      currentBlock.format.page_icon = collectionBlock.icon
+    }
+    if (!currentBlock.format.page_cover) {
+      currentBlock.format.page_cover = collectionBlock.cover
+    }
+  }
+
   // resolve duplicated page urls in current page
   const canonicalPageMap = siteMap?.canonicalPageMap
   const inversePageUrlOverrides = {...site.inversePageUrlOverrides}
