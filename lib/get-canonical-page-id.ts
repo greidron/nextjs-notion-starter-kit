@@ -1,10 +1,12 @@
 import { ExtendedRecordMap } from 'notion-types'
 import {
-  getCanonicalPageId as getCanonicalPageIdImpl,
+  getBlockTitle,
+  getPageProperty,
   parsePageId,
   idToUuid,
   uuidToId,
 } from 'notion-utils'
+import unidecode from 'unidecode'
 
 import {
   inversePageUrlOverrides as defaultInversePageUrlOverrides,
@@ -30,7 +32,53 @@ function getParentPath(
   return parentId && inversePageUrlOverrides[uuidToId(parentId)]
 }
 
+function normalizeTitle(title?: string | null): string {
+  return unidecode(title || '')
+    .replace(/ /g, '-')
+    .replace(
+      /[^a-zA-Z0-9-\u4e00-\u9FFF\u3041-\u3096\u30A1-\u30FC\u3000-\u303F]/g,
+      ''
+    )
+    .replace(/--/g, '-')
+    .replace(/-$/, '')
+    .replace(/^-/, '')
+    .trim()
+    .toLowerCase()
+}
+
 export function getCanonicalPageId(
+  pageId: string,
+  recordMap: ExtendedRecordMap,
+  {
+    uuid = true,
+  }: {
+    uuid?: boolean,
+  } = {}
+): string | null {
+  if (!pageId || !recordMap) return null
+
+  const id = uuidToId(pageId)
+  const block = recordMap.block[pageId]?.value
+
+  if (block) {
+    const slug =
+      (getPageProperty('slug', block, recordMap) as string | null) ||
+      (getPageProperty('Slug', block, recordMap) as string | null) ||
+      normalizeTitle(getBlockTitle(block, recordMap))
+
+    if (slug) {
+      if (uuid) {
+        return `${slug}-${id}`
+      } else {
+        return slug
+      }
+    }
+  }
+
+  return id
+}
+
+export function getCanonicalPath(
   pageId: string,
   recordMap: ExtendedRecordMap,
   {
@@ -40,7 +88,7 @@ export function getCanonicalPageId(
   }: {
     uuid?: boolean,
     navigationPageIds?: string[],
-    inversePageUrlOverrides?: PageUrlOverridesInverseMap
+    inversePageUrlOverrides?: PageUrlOverridesInverseMap,
   } = {}
 ): string | null {
   const cleanPageId = parsePageId(pageId, { uuid: false })
@@ -54,9 +102,7 @@ export function getCanonicalPageId(
   } else {
     const parentPath = getParentPath(
       cleanPageId, recordMap, navigationPageIds, inversePageUrlOverrides)
-    const canonicalPageId = getCanonicalPageIdImpl(pageId, recordMap, {
-      uuid
-    })
+    const canonicalPageId = getCanonicalPageId(pageId, recordMap, { uuid })
     return parentPath? parentPath + '/' + canonicalPageId : canonicalPageId
   }
 }

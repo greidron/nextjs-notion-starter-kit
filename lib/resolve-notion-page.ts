@@ -11,8 +11,7 @@ import { template } from './template'
 import { SiteMap, RecordMapMeta } from './types'
 
 function getSiteMapUrl(siteMap: SiteMap, pageId: string) {
-  const canonicalPageId = siteMap?.pageMap[pageId]?.block?.[pageId]?.value?.properties?.canonical_page_id
-  return canonicalPageId && `/${canonicalPageId}`
+  return siteMap?.pageMap[pageId]?.block?.[pageId]?.value?.properties?.canonical_page_path
 }
 
 export async function resolveNotionPage(domain: string, path?: string) {
@@ -27,7 +26,7 @@ export async function resolveNotionPage(domain: string, path?: string) {
     if (pageId) {
       // redirect URL with page UUID
       const redirectUrl = getSiteMapUrl(siteMap, pageId)
-      if (redirectUrl) {
+      if (redirectUrl && redirectUrl != path) {
         return { redirectUrl }
       }
     }

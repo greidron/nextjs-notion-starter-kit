@@ -2,7 +2,7 @@ import { ExtendedRecordMap } from 'notion-types'
 import { parsePageId, uuidToId } from 'notion-utils'
 
 import { includeNotionIdInUrls } from './config'
-import { getCanonicalPageId } from './get-canonical-page-id'
+import { getCanonicalPath } from './get-canonical-page-id'
 import { Site } from './types'
 
 // include UUIDs in page URLs during local development but not in production
@@ -17,7 +17,7 @@ export const mapPageUrl =
     if (uuidToId(pageUuid) === site.rootNotionPageId) {
       return createUrl('/', searchParams)
     } else {
-      const canonicalPageId = getCanonicalPageId(
+      const canonicalPagePath = getCanonicalPath(
         pageUuid, recordMap,
         {
           uuid,
@@ -25,7 +25,7 @@ export const mapPageUrl =
           inversePageUrlOverrides: site.inversePageUrlOverrides,
         }
       )
-      return createUrl(`/${canonicalPageId}`, searchParams)
+      return createUrl(`/${canonicalPagePath}`, searchParams)
     }
   }
 

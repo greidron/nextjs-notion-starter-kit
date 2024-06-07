@@ -3,7 +3,7 @@ import pMemoize from 'p-memoize'
 
 import * as types from './types'
 import { rootNotionPageId, rootNotionSpaceId, includeNotionIdInUrls, site } from './config'
-import { getCanonicalPageId } from './get-canonical-page-id'
+import { getCanonicalPath } from './get-canonical-page-id'
 import { notion } from './notion-api'
 
 const uuid = !!includeNotionIdInUrls
@@ -33,7 +33,7 @@ const getPageImpl = async (pageId: string, ...args) => {
     if (!block.properties) {
       block.properties = {}
     }
-    block.properties.canonical_page_id = getCanonicalPageId(pageId, recordMap, {
+    block.properties.canonical_page_path = getCanonicalPath(pageId, recordMap, {
       uuid
     })
   }
@@ -83,28 +83,28 @@ async function getAllPagesImpl(
     .sort((lhs, rhs) => ((lhs.created_time ?? 0) - (rhs.created_time ?? 0)))
     .reduce((map, block) => {
       const pageId = block.id
-      const canonicalPageId = block.properties?.canonical_page_id
-      if (!canonicalPageId) {
+      const canonicalPagePath = block.properties?.canonical_page_path
+      if (!canonicalPagePath) {
         return map
       }
-      let mappedPageId = canonicalPageId
+      let mappedPageId = canonicalPagePath
       for (let i = 0; i < MAX_COLLISION; ++i) {
         if (!duplicatedIdCounter.has(mappedPageId)) {
           break
         }
-        const ordinal = duplicatedIdCounter.get(canonicalPageId)
-        duplicatedIdCounter.set(canonicalPageId, ordinal + 1)
-        mappedPageId = `${canonicalPageId}-${ordinal}`
+        const ordinal = duplicatedIdCounter.get(canonicalPagePath)
+        duplicatedIdCounter.set(canonicalPagePath, ordinal + 1)
+        mappedPageId = `${canonicalPagePath}-${ordinal}`
       }
 
       if (!duplicatedIdCounter.has(mappedPageId)) {
         duplicatedIdCounter.set(mappedPageId, 2)
         map[mappedPageId] = pageId
       } else {
-        console.warn('error duplicate canonical page id', {
-          canonicalPageId,
+        console.warn('error duplicate canonical page path', {
+          canonicalPagePath: canonicalPagePath,
           pageId,
-          existingPageId: map[canonicalPageId]
+          existingPageId: map[canonicalPagePath]
         })
       }
       return map
