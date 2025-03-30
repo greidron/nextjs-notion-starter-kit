@@ -1,5 +1,3 @@
-import * as React from 'react'
-
 import { FaEnvelopeOpenText } from '@react-icons/all-files/fa/FaEnvelopeOpenText'
 import { FaGithub } from '@react-icons/all-files/fa/FaGithub'
 import { FaLinkedin } from '@react-icons/all-files/fa/FaLinkedin'
@@ -9,8 +7,9 @@ import { FaYoutube } from '@react-icons/all-files/fa/FaYoutube'
 import { FaZhihu } from '@react-icons/all-files/fa/FaZhihu'
 import { IoMoonSharp } from '@react-icons/all-files/io5/IoMoonSharp'
 import { IoSunnyOutline } from '@react-icons/all-files/io5/IoSunnyOutline'
+import * as React from 'react'
 
-import { SocialAccounts } from '@/lib/types'
+import { type SocialAccounts } from '@/lib/types'
 import { useDarkMode } from '@/lib/use-dark-mode'
 
 import styles from './styles.module.css'
@@ -26,13 +25,15 @@ const getMastodonHandle = (mastodon?: string): string | null => {
   return `${url.pathname.slice(1)}@${url.hostname}`
 }
 
-// TODO: merge the data and icons from PageSocial with the social links in Footer
-
-export const FooterImpl: React.FC<{
-  author?: string
-  copyright?: string
-  socialAccounts?: SocialAccounts
-}> = ({ author, copyright, socialAccounts }) => {
+export function FooterImpl({ 
+  author, 
+  copyright, 
+  socialAccounts
+ } : {
+  author: string
+  copyright: string
+  socialAccounts: SocialAccounts
+ }) {
   const [hasMounted, setHasMounted] = React.useState(false)
   const { isDarkMode, toggleDarkMode } = useDarkMode()
 

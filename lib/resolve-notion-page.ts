@@ -1,4 +1,4 @@
-import { ExtendedRecordMap } from 'notion-types'
+import { type ExtendedRecordMap } from 'notion-types'
 import { parsePageId, uuidToId } from 'notion-utils'
 
 import * as acl from './acl'
@@ -8,7 +8,7 @@ import { db } from './db'
 import { getSiteMap, updateSiteMap } from './get-site-map'
 import { getPage } from './notion'
 import { template } from './template'
-import { SiteMap, RecordMapMeta } from './types'
+import { type RecordMapMeta,type SiteMap } from './types'
 
 function getSiteMapUrl(siteMap: SiteMap, pageId: string) {
   return siteMap?.pageMap[pageId]?.block?.[pageId]?.value?.properties?.canonical_page_path
@@ -26,7 +26,7 @@ export async function resolveNotionPage(domain: string, path?: string) {
     if (pageId) {
       // redirect URL with page UUID
       const redirectUrl = getSiteMapUrl(siteMap, pageId)
-      if (redirectUrl && redirectUrl != path) {
+      if (redirectUrl && redirectUrl !== path) {
         return { redirectUrl }
       }
     }

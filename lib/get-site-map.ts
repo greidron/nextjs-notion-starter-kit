@@ -1,8 +1,8 @@
-import { getAllPagesInSpace, uuidToId, getPageProperty } from 'notion-utils'
+import { getAllPagesInSpace, getPageProperty, uuidToId } from 'notion-utils'
 import pMemoize from 'p-memoize'
 
-import * as types from './types'
-import { rootNotionPageId, rootNotionSpaceId, includeNotionIdInUrls, site } from './config'
+import type * as types from './types'
+import { includeNotionIdInUrls, rootNotionPageId, rootNotionSpaceId, site } from './config'
 import { getCanonicalPath } from './get-canonical-page-id'
 import { notion } from './notion-api'
 
@@ -46,15 +46,15 @@ export function updateSiteMap(pageId: string): Promise<types.SiteMap> {
   return getSiteMap()
 }
 
-const getPage = pMemoize(getPageImpl, {
-  cacheKey: ([pageId]) => (pageId),
-  cache: pageCache,
-})
-
 const getAllPages = pMemoize(getAllPagesImpl, {
   cacheKey: () => (ALL_PAGES_KEY),
   cache: pageCache,
 })
+
+const getPage = async (pageId: string, ...args) => {
+  console.log('\nnotion getPage', uuidToId(pageId))
+  return getPageImpl(pageId, ...args)
+}
 
 async function getAllPagesImpl(
   rootNotionPageId: string,
@@ -102,7 +102,7 @@ async function getAllPagesImpl(
         map[mappedPageId] = pageId
       } else {
         console.warn('error duplicate canonical page path', {
-          canonicalPagePath: canonicalPagePath,
+          canonicalPagePath,
           pageId,
           existingPageId: map[canonicalPagePath]
         })

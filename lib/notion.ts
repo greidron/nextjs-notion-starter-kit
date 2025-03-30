@@ -1,5 +1,10 @@
-import { createHash } from 'crypto'
-import { ExtendedRecordMap, SearchParams, SearchResults } from 'notion-types'
+import { createHash } from 'node:crypto'
+
+import {
+  type ExtendedRecordMap,
+  type SearchParams,
+  type SearchResults
+} from 'notion-types'
 import { mergeRecordMaps } from 'notion-utils'
 import pMap from 'p-map'
 import pMemoize from 'p-memoize'
@@ -9,9 +14,10 @@ import {
   navigationLinks,
   navigationStyle
 } from './config'
+import { getTweetsMap } from './get-tweets'
 import { notion } from './notion-api'
 import { getPreviewImageMap } from './preview-images'
-import { RecordMapMeta } from './types'
+import { type RecordMapMeta } from './types'
 
 const getNavigationLinkPages = pMemoize(
   async (): Promise<ExtendedRecordMap[]> => {
@@ -42,7 +48,7 @@ const getNavigationLinkPages = pMemoize(
 function recordMapHash(recordMap?: ExtendedRecordMap): string {
   return [
     recordMap?.block, recordMap?.collection_view, recordMap?.collection
-  ].map((obj) => Object.keys(obj)).flat().filter(Boolean)
+  ].flatMap((obj) => Object.keys(obj)).filter(Boolean)
   .reduce(
     (acc, data) => {
       acc.update(data)
@@ -93,6 +99,8 @@ export async function getPage(
     const previewImageMap = await getPreviewImageMap(recordMap)
     ;(recordMap as any).preview_images = previewImageMap
   }
+
+  await getTweetsMap(recordMap)
 
   return { ...recordMap, ...recordMapMeta }
 }

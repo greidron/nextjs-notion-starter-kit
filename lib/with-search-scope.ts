@@ -1,8 +1,8 @@
 import {
-  Block, Collection, ExtendedRecordMap,
-  SearchParams, SearchResults,
+  type Block, type Collection, type ExtendedRecordMap,
+  type SearchParams, type SearchResults,
 } from 'notion-types'
-import { idToUuid, uuidToId } from 'notion-utils'
+import { idToUuid, uuidToId } from './utils'
 
 import { getBlockParent } from './get-block-parent'
 
@@ -51,20 +51,23 @@ export function withSearchScope(
 ): SearchFunctionEnhancer {
   const targetPageIds = new Set<string>()
   if (navigationPageIds) {
-    navigationPageIds.map((pageId) => getPageIdPath(pageId, recordMap))
-      .forEach((path) => targetPageIds.add(path[0]))
+    for (const navPageId of navigationPageIds) {
+      const path = getPageIdPath(navPageId, recordMap)
+      if (path.includes(rootPageId)) continue
+      targetPageIds.add(uuidToId(navPageId))
+    }
   }
   const rootPath = getPageIdPath(rootPageId, recordMap)
-  if (!targetPageIds.has(rootPath[0])) {
+  if (rootPath.every(id => !targetPageIds.has(id))) {
     targetPageIds.add(rootPageId)
   }
+
   return (searchNotion: SearchFunction) => async (params: SearchParams) => {
     const searchTasks = []
     for (const navPageId of targetPageIds) {
-      const path = getPageIdPath(navPageId, recordMap)
-      if (path.includes(rootPageId)) continue
       searchTasks.push(
-        searchNotion({ ...params, ancestorId: navPageId }))
+        searchNotion({ ...params, ancestorId: navPageId })
+      )
     }
 
     const searchResults = []
@@ -79,14 +82,19 @@ export function withSearchScope(
         searchResults.push(subResults)
         total += subTotal
         mergeRecordMap(recordMap, subRecordMap)
-      } catch (e) {
-        console.error(e, e.stack)
+      } catch (err) {
+        console.error(err, err.stack)
       }
     }
+
+    const mergedSearchResults = searchResults.flat()
+    const filteredSearchResults = mergedSearchResults.filter(
+      (item) => getPageIdPath(item?.id, recordMap)?.some(id => targetPageIds.has(id))
+    )
     return {
       recordMap,
-      total,
-      results: searchResults.flat(),
+      total: total + mergedSearchResults.length - filteredSearchResults.length,
+      results: filteredSearchResults,
     }
   }
 }

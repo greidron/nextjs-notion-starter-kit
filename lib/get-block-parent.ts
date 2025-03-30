@@ -1,4 +1,4 @@
-import { Block, Collection, ExtendedRecordMap } from 'notion-types'
+import { type Block, type Collection, type ExtendedRecordMap } from 'notion-types'
 
 export type BlockPredicate = (b: Block | Collection) => boolean
 

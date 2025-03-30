@@ -1,9 +1,8 @@
-import * as React from 'react'
-
-import { Block, BasePageBlock, ExtendedRecordMap } from 'notion-types'
-import { idToUuid, getBlockIcon, getBlockTitle } from 'notion-utils'
-import { PageIcon, useNotionContext } from 'react-notion-x'
 import cs from 'classnames'
+import { type BasePageBlock, type Block, type ExtendedRecordMap } from 'notion-types'
+import { getBlockIcon, getBlockTitle,idToUuid } from 'notion-utils'
+import * as React from 'react'
+import { PageIcon, useNotionContext } from 'react-notion-x'
 
 import { getBlockParent, isPage } from '@/lib/get-block-parent'
 
@@ -50,7 +49,7 @@ function getPageBreadcrumbs(
   }
 
   const rootBreadcrumb = getPageBreadcrumb(blockMap[rootPageUuid]?.value, recordMap)
-  const lastPageId = breadcrumbs.slice(-1)[0]?.pageId
+  const lastPageId = breadcrumbs.at(-1)?.pageId
   
   if (rootBreadcrumb && lastPageId !== rootPageUuid) {
     breadcrumbs.push(rootBreadcrumb)
@@ -58,11 +57,15 @@ function getPageBreadcrumbs(
   return breadcrumbs.reverse()
 }
 
-export const Breadcrumbs: React.FC<{
+export function Breadcrumbs({ 
+  block, 
+  rootPageId, 
+  navigationPageIds 
+} : {
   block: Block,
   rootPageId: string,
   navigationPageIds?: string[]
-}> = ({ block, rootPageId, navigationPageIds }) => {
+}) {
   const { recordMap, mapPageUrl, components } = useNotionContext()
   const breadcrumbs = React.useMemo(
       () => {

@@ -1,9 +1,9 @@
-import { ExtendedRecordMap } from 'notion-types'
+import { type ExtendedRecordMap } from 'notion-types'
 import {
   getBlockTitle,
   getPageProperty,
-  parsePageId,
   idToUuid,
+  parsePageId,
   uuidToId,
 } from 'notion-utils'
 import unidecode from 'unidecode'
@@ -13,7 +13,7 @@ import {
   navigationPageIds as defaultNavigationPageIds,
 } from './config'
 import { getBlockParent } from './get-block-parent'
-import { PageUrlOverridesInverseMap } from './types'
+import { type PageUrlOverridesInverseMap } from './types'
 
 function getParentPath(
   pageId: string,
@@ -34,12 +34,12 @@ function getParentPath(
 
 function normalizeTitle(title?: string | null): string {
   return unidecode(title || '')
-    .replace(/ /g, '-')
-    .replace(
-      /[^a-zA-Z0-9-\u4e00-\u9FFF\u3041-\u3096\u30A1-\u30FC\u3000-\u303F]/g,
+    .replaceAll(' ', '-')
+    .replaceAll(
+      /[^\dA-Za-z\u3000-\u303F\u3041-\u3096\u30A1-\u30FC\u4E00-\u9FFF-]/g,
       ''
     )
-    .replace(/--/g, '-')
+    .replaceAll('--', '-')
     .replace(/-$/, '')
     .replace(/^-/, '')
     .trim()

@@ -1,8 +1,7 @@
-import * as React from 'react'
-
+import type * as React from 'react'
 import cs from 'classnames'
 
-import { SocialAccounts } from '@/lib/types'
+import { type SocialAccounts } from '@/lib/types'
 
 import styles from './PageSocial.module.css'
 
@@ -70,10 +69,13 @@ const getSocialLinks = (author?: string, socialAccounts?: SocialAccounts): Socia
   }
 ].filter(Boolean)
 
-export const PageSocial: React.FC<{
+export function PageSocial({ 
+  author, 
+  socialAccounts 
+} : {
   author?: string
   socialAccounts?: SocialAccounts
-}> = ({ author, socialAccounts }) => {
+}) {
   return (
     <div className={styles.pageSocial}>
       {getSocialLinks(author, socialAccounts).map((action) => (

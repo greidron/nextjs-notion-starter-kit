@@ -1,10 +1,10 @@
 import Keyv from '@keyvhq/core'
-import { KeyvLru } from 'keyv-lru'
 import KeyvRedis from '@keyvhq/redis'
+import { KeyvLru } from 'keyv-lru'
 
 import {
-  isLruEnabled, lruMax, lruTtl,
-  isRedisEnabled, redisNamespace, redisUrl,
+  isLruEnabled,   isRedisEnabled, lruMax, lruTtl,
+redisNamespace, redisUrl,
 } from './config'
 
 let db: Keyv

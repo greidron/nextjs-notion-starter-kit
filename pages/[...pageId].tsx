@@ -1,10 +1,10 @@
+import { type GetServerSideProps } from 'next'
 import * as React from 'react'
-import { GetServerSideProps } from 'next'
 
 import { NotionPage } from '@/components/NotionPage'
 import { domain } from '@/lib/config'
 import { resolveNotionPage } from '@/lib/resolve-notion-page'
-import { PageProps, Params } from '@/lib/types'
+import { type PageProps, type Params } from '@/lib/types'
 
 export const getServerSideProps: GetServerSideProps<PageProps, Params> = async (
   context

@@ -9,10 +9,9 @@ FROM base as deps
 RUN apk add --no-cache build-base
 WORKDIR /app
 
-COPY tarballs/ ./tarballs/
 COPY package.json yarn.lock ./ 
 
-RUN yarn install --arch=x64 --platform=linuxmusl
+RUN yarn install --arch=x64 --platform=linuxmusl --verbose --network-timeout 6000000
 
 # build application
 FROM base as builder
@@ -47,7 +46,7 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 RUN cp /app/server.js /app/next.server.js
 COPY --from=builder /app/.next/static ./.next/static
-COPY server.js ./
+COPY server.js ./server.cjs
 COPY scripts ./
 
 CMD ["/app/entrypoint.sh"]

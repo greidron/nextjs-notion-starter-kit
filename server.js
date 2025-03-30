@@ -1,8 +1,8 @@
-const path = require('path');
-const http = require('http');
-const https = require('https');
-const fs = require('fs');
-const crypto = require('crypto');
+const path = require('node:path');
+const http = require('node:http');
+const https = require('node:https');
+const fs = require('node:fs');
+const crypto = require('node:crypto');
 const next = require('next');
 
 function createApp(options = {}) {
@@ -11,7 +11,7 @@ function createApp(options = {}) {
         customServer: true,
         dev: false,
     });
-    return app.prepare().then(() => Promise.resolve(app));
+    return app.prepare().then(() => app);
 }
 
 function readFile(path) {
@@ -89,8 +89,8 @@ function startHttpsServer({ handler, port, hostname, certPaths }) {
                 server.setSecureContext(certs);
                 console.log('renewed SSL certificates');
                 printCertInfo(certs);
-            }).catch((e) => {
-                console.error('failed to renew SSL certificates: ' + e);
+            }).catch((err) => {
+                console.error('failed to renew SSL certificates: ' + err);
             });
         }, 5000);
     };
@@ -102,9 +102,9 @@ function startHttpsServer({ handler, port, hostname, certPaths }) {
         const isEmptyCertPath = pathList.length == 0;
         if (!isEmptyCertPath) {
             console.log('start watching SSL certificate paths: ' + pathList.join(','));
-            pathList.forEach((path) => {
+            for (const path of pathList) {
                 fs.watchFile(path, replaceSslContext(server));
-            });
+            }
         }
         return server;
     });
@@ -131,8 +131,8 @@ function main() {
     const publicDir = path.join(rootDir, 'public');
 
     // environment variables
-    const httpPort = parseInt(process.env.HTTP_PORT, 10) || 3000;
-    const httpsPort = parseInt(process.env.HTTPS_PORT, 10) || 3443;
+    const httpPort = Number.parseInt(process.env.HTTP_PORT, 10) || 3000;
+    const httpsPort = Number.parseInt(process.env.HTTPS_PORT, 10) || 3443;
     const sslKeyPath = process.env.SSL_KEY_PATH;
     const sslCertPath = process.env.SSL_CERT_PATH;
     const sslCaCertPath = process.env.SSL_CA_CERT_PATH;
@@ -142,7 +142,7 @@ function main() {
     createApp({
         conf: config,
         dir: rootDir,
-        hostname: hostname,
+        hostname,
     }).then((app) => {
         const appRequestHandler = app.getRequestHandler();
         const httpRequestHandler = makeHttpRequestHandler({
@@ -154,8 +154,8 @@ function main() {
             handler: httpRequestHandler,
             port: httpPort,
             hostname,
-        }).catch((e) => {
-            console.error('failed to start http server: ' + e);
+        }).catch((err) => {
+            console.error('failed to start http server: ' + err);
         });
         startHttpsServer({
             handler: appRequestHandler,
@@ -166,12 +166,12 @@ function main() {
                 certPath: sslCertPath,
                 caCertPath: sslCaCertPath,
             },
-        }).catch((e) => {
-            console.error('failed to start https server: ' + e);
+        }).catch((err) => {
+            console.error('failed to start https server: ' + err);
         });
     })
-    .catch((e) => {
-        console.error('server error: ' + e);
+    .catch((err) => {
+        console.error('server error: ' + err);
     });
 }
 

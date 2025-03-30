@@ -5,16 +5,16 @@
  * for optional depenencies.
  */
 import { parsePageId } from 'notion-utils'
-import { PostHogConfig } from 'posthog-js'
+import { type PostHogConfig } from 'posthog-js'
 
 import { getEnv, getSiteConfig } from './get-config-value'
 import {
-  NavigationStyle,
-  NavigationLink,
-  PageUrlOverridesInverseMap,
-  PageUrlOverridesMap,
-  Site,
-  SocialAccounts,
+  type NavigationLink,
+  type NavigationStyle,
+  type PageUrlOverridesInverseMap,
+  type PageUrlOverridesMap,
+  type Site,
+  type SocialAccounts
 } from './types'
 
 export const navigationLinks: Array<NavigationLink> | null = getSiteConfig(
@@ -22,9 +22,9 @@ export const navigationLinks: Array<NavigationLink> | null = getSiteConfig(
   null
 )
 
-export const navigationPageIds: string[] | null = navigationLinks
-  ?.map((link) => link.pageId)
-  .filter(Boolean)
+export const navigationPageIds: string[] | null = (
+  (navigationLinks?.map((link) => link.pageId).filter(Boolean)) || null
+)
 
 export const rootNotionPageId: string = parsePageId(
   getSiteConfig('rootNotionPageId'),
@@ -66,7 +66,7 @@ export const copyrightYear: string = getSiteConfig('copyrightYear', String(new D
 // general site config
 export const name: string = getSiteConfig('name')
 export const author: string = getSiteConfig('author')
-export const copyright: string = getSiteConfig('copyright', '© ${copyrightYear} ${author}')
+export const copyright: string = getSiteConfig('copyright', '© ${copyrightYear} ${author}') // eslint-disable-line no-template-curly-in-string
 export const domain: string = getSiteConfig('domain')
 export const description: string = getSiteConfig('description', 'Notion Blog')
 export const language: string = getSiteConfig('language', 'en')
@@ -140,8 +140,8 @@ export const redisNamespace: string | null = getEnv(
 export const isLruEnabled: boolean =
   getSiteConfig('isLruEnabled', false) || !!getEnv('LRU_ENABLED', null)
 
-export const lruMax: number = getSiteConfig('lruMax', null) || parseInt(getEnv('LRU_MAX', '1000'))
-export const lruTtl: number = getSiteConfig('lruTtl', null) || parseInt(getEnv('LRU_TTL', '0'))
+export const lruMax: number = getSiteConfig('lruMax', null) || Number.parseInt(getEnv('LRU_MAX', '1000'))
+export const lruTtl: number = getSiteConfig('lruTtl', null) || Number.parseInt(getEnv('LRU_TTL', '0'))
 
 // ----------------------------------------------------------------------------
 
