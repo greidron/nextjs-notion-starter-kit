@@ -5,6 +5,27 @@ const fs = require('node:fs');
 const crypto = require('node:crypto');
 const next = require('next');
 
+function loadSiteConfig() {
+    try {
+        if (!process.env.NEXT_PUBLIC_SITE_CONFIG) {
+            return;
+        }
+        const siteConfig = JSON.parse(process.env.NEXT_PUBLIC_SITE_CONFIG);
+        if (siteConfig.nextAuthUrl) {
+            process.env.NEXT_AUTH_URL = siteConfig.nextAuthUrl;
+            if (siteConfig.nextAuthSecret) {
+                process.env.NEXT_AUTH_SECRET = siteConfig.nextAuthSecret;
+            }
+            if (siteConfig.nextAuthUrlInternal) {
+                process.env.NEXT_AUTH_URL_INTERNAL = siteConfig.nextAuthUrlInternal;
+            }
+        }
+    } catch (err) {
+        console.error('Failed to parse NEXT_PUBLIC_SITE_CONFIG');
+        throw err;
+    }
+}
+
 function createApp(options = {}) {
     const app = next({
         ...options,
@@ -112,11 +133,15 @@ function startHttpsServer({ handler, port, hostname, certPaths }) {
 
 function main() {
     // set process environments
+    loadSiteConfig();
     const { config } = require('./.next/required-server-files.json');
     process.env.__NEXT_PRIVATE_STANDALONE_CONFIG = JSON.stringify(config);
     if (!process.env.NODE_ENV) {
         // defaults to production
         process.env.NODE_ENV = 'production';
+    }
+    if (!process.env.APP_DATA_PATH) {
+        process.env.APP_DATA_PATH = path.join(__dirname, 'data')
     }
     process.chdir(__dirname);
 
@@ -138,6 +163,11 @@ function main() {
     const sslCaCertPath = process.env.SSL_CA_CERT_PATH;
     const sslChallengePath = process.env.SSL_CHALLENGE_PATH || '/.well-known/';
     const hostname = process.env.HOSTNAME || 'localhost';
+
+    // create data directory
+    if (!fs.existsSync(process.env.APP_DATA_PATH)){
+        fs.mkdirSync(process.env.APP_DATA_PATH, { recursive: true });
+    }
 
     createApp({
         conf: config,
