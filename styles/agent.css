@@ -1,0 +1,132 @@
+body,
+html {
+  padding: 0;
+  margin: 0;
+  color: black;
+}
+
+/* header */
+
+.agent-header {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3rem;
+}
+
+.agent-header-navbar {
+  position: absolute;
+  width: 100%;
+  padding: 0 0.5rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.agent-header-navbar .item {
+  display: flex;
+  width: 20vw;
+}
+
+.agent-header-navbar .center {
+  text-align: center;
+}
+
+.agent-header-navbar .right {
+  text-align: center;
+}
+
+.agent-header-navbar .button {
+  padding: 0.5rem;
+  border: none;
+  background: none;
+}
+
+.agent-header-navbar .title {
+  font-weight: bolder;
+}
+
+.agent-header-navbar .title svg {
+  width: 2em;
+  height: 2em;
+}
+
+/* sidebar */
+
+.agent-sidebar {
+  
+}
+
+/* main layout */
+.agent-main {
+  width: 100%;
+  height: 100%;
+}
+
+/* contents */
+
+.agent-content {
+  padding: 3rem 1rem 0 1rem;
+  height: 100vh;
+}
+
+.agent-content-single {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* login button */
+
+.agent-login-button {
+  cursor: pointer;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  min-width: 20vw;
+}
+
+.agent-login-button span {
+  padding: 0 1rem;
+  font-weight: bold;
+}
+
+.agent-login-github-button {
+  background-color: white;
+  color: black;
+}
+
+button svg {
+  width: 2em;
+  height: 2em;
+  cursor: pointer;
+}
+
+button[disabled] svg {
+  color: dimgray;
+  cursor: not-allowed;
+}
+
+@media (prefers-color-scheme: dark) {
+  body,
+  html {
+    color: white;
+  }
+
+  .agent-login-github-button {
+    background-color: black;
+    color: white;
+  }
+
+  button svg {
+    color: white;
+  }
+
+  button[disabled] svg {
+    color: lightgray;
+  }
+}
