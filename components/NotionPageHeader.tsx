@@ -1,5 +1,6 @@
 import { IoMoonSharp } from '@react-icons/all-files/io5/IoMoonSharp'
 import { IoSunnyOutline } from '@react-icons/all-files/io5/IoSunnyOutline'
+import { GoHubot } from '@react-icons/all-files/go/GoHubot'
 import cs from 'classnames'
 import * as React from 'react'
 import { Header, Search, useNotionContext } from 'react-notion-x'
@@ -41,6 +42,7 @@ export function NotionPageHeader({
   const { components, mapPageUrl } = useNotionContext()
   const {
     isSearchEnabled,
+    isAgentEnabled,
     rootNotionPageId,
     navigationStyle,
     navigationLinks,
@@ -94,6 +96,17 @@ export function NotionPageHeader({
           <ToggleThemeButton />
 
           {isSearchEnabled && <Search block={block} title={null} />}
+          {
+            isAgentEnabled && (
+              <components.PageLink
+                href="/agent"
+                key="agent"
+                className={cs(styles.navLink, 'breadcrumb', 'button')}
+              >
+                <GoHubot />
+              </components.PageLink>
+            )
+          }
         </div>
       </div>
     </header>

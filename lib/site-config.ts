@@ -36,6 +36,15 @@ export interface SiteConfig {
 
   navigationStyle?: types.NavigationStyle
   navigationLinks?: Array<types.NavigationLink>
+
+  nextAuthSecret?: string | null
+
+  openAiApiKey?: string | null
+
+  githubAppClientId?: string | null
+  githubAppClientSecret?: string | null
+
+  allowedUserId?: string[] | null
 }
 
 export const siteConfig = (config: SiteConfig): SiteConfig => {
