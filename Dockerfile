@@ -39,6 +39,7 @@ ENV GET_CERT_PATH /app/cert
 ENV SSL_KEY_PATH /app/cert/privkey.pem
 ENV SSL_CERT_PATH /app/cert/fullchain.pem
 ENV CERTBOT_WEBROOT /app/public
+ENV APP_DATA_PATH /app/data
 
 RUN apk add --no-cache certbot
 RUN mkdir ./.next
@@ -48,6 +49,8 @@ RUN cp /app/server.js /app/next.server.js
 COPY --from=builder /app/.next/static ./.next/static
 COPY server.js ./server.cjs
 COPY scripts ./
+
+RUN mkdir -p ${APP_DATA_PATH}
 
 CMD ["/app/entrypoint.sh"]
 
