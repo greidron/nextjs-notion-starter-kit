@@ -72,6 +72,7 @@ export interface Site {
   darkMode?: boolean
   previewImages?: boolean
   isSearchEnabled?: boolean
+  isAgentEnabled?: boolean
 
   // opengraph metadata
   description?: string

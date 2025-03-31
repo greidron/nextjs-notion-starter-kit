@@ -11,6 +11,9 @@ let siteConfigOverrides: SiteConfig
 try {
   if (process.env.NEXT_PUBLIC_SITE_CONFIG) {
     siteConfigOverrides = JSON.parse(process.env.NEXT_PUBLIC_SITE_CONFIG)
+    for (const key of ['nextAuthSecret', 'nextAuthUrlInternal']) {
+      delete siteConfigOverrides[key]
+    }
   }
 } catch (err) {
   console.error('Invalid config "NEXT_PUBLIC_SITE_CONFIG" failed to parse')

@@ -114,6 +114,15 @@ export const navigationStyle: NavigationStyle = getSiteConfig(
 // Optional site search
 export const isSearchEnabled: boolean = getSiteConfig('isSearchEnabled', true)
 
+// Agent related
+export const openAiApiKey: string | null = getSiteConfig('openAiApiKey')
+export const githubAppClientId: string | null = getSiteConfig('githubAppClientId')
+export const githubAppClientSecret: string | null = getSiteConfig('githubAppClientSecret')
+export const allowedUserId: string[] = getSiteConfig('allowedUserId') || []
+export const isAgentEnabled: boolean = (
+  openAiApiKey && githubAppClientId && githubAppClientSecret && allowedUserId.length > 0
+)
+
 // ----------------------------------------------------------------------------
 
 // Optional redis instance for persisting preview images
@@ -189,6 +198,7 @@ export const site: Site = {
   defaultPageCover,
   defaultPageCoverPosition,
   isSearchEnabled,
+  isAgentEnabled,
   description,
   copyright,
   author,
